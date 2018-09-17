@@ -28,9 +28,8 @@ function send_message_to_customers($customer_phones, $message_body){
         $message = $twilio->messages
             ->create($phone,
                 array(
-                    "body" => "McAvoy or Stewart? These timelines can get so confusing.",
+                    "body" => $message_body,
                     "from" => TWILIO_NUMBER,
-                    "statusCallback" => "http://postb.in/1234abcd"
                 )
             );
         array_push($message_sids, $message->sid);
@@ -42,7 +41,7 @@ function send_message_to_customers($customer_phones, $message_body){
 
 function save_message_detail($names, $phones, $message, $sids, $statuses, $dates){
     $headers =  ['Name', 'Cellphone number', 'Message', 'Message_sid', 'Status', 'Sent_date-time'];
-    $file = fopen('message_detail.csv', 'w');
+    $file = fopen(BASE_PRO.'/message_detail.csv', 'w');
     fputcsv($file, $headers);
     foreach($names as $key => $content){
         fputcsv($file, [$names[$key], $phones[$key], $message, $sids[$key], $statuses[$key], $dates[$key]]);
