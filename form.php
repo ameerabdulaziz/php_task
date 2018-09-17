@@ -14,10 +14,11 @@ if (isset($_POST['submit'])):
         $customer_names = get_customer_info($file_location)[0];
         $customer_phones = get_customer_info($file_location)[1];
         $message_body = $_POST['message'];
-        send_message_to_customers($customer_phones, $message_body);
+        $message_detail = send_message_to_customers($customer_phones, $message_body);
+        save_message_detail($customer_names, $customer_phones, $message_body, $message_detail[0], $message_detail[1], $message_detail[2]);
         $_SESSION['success'] = 'Message sent!';
-        header('Location: index.php');
-        return;
+//        header('Location: index.php');
+//        return;
     endif;
 endif;
 ?>

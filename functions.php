@@ -20,17 +20,31 @@ function get_customer_info($file_location){
 }
 
 function send_message_to_customers($customer_phones, $message_body){
-    $account_sid = TWILIO_ACCOUNT_SID;
-    $auth_token = 'TWILIO_AUTH_TOKEN';
-    $twilio_number = "TWILIO_NUMBER";
-    $client = new Client($account_sid, $auth_token);
+    $twilio = new Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+    $message_sids = array();
+    $message_statuses = array();
+    $message_dates = array();
     foreach ($customer_phones as $phone):
-        $client->messages->create(
-            $phone,
-            array(
-                'from' => $twilio_number,
-                'body' => $message_body
-            )
-        );
+        $message = $twilio->messages
+            ->create($phone,
+                array(
+                    "body" => "McAvoy or Stewart? These timelines can get so confusing.",
+                    "from" => TWILIO_NUMBER,
+                    "statusCallback" => "http://postb.in/1234abcd"
+                )
+            );
+        array_push($message_sids, $message->sid);
+        array_push($message_statuses, $twilio->messages($message->sid)->fetch()->status);
+        array_push($message_dates, $twilio->messages($message->sid)->fetch()->dateSent->format('Y-m-d H:i:s'));
     endforeach;
+    return array($message_sids, $message_statuses, $message_dates);
+}
+
+function save_message_detail($names, $phones, $message, $sids, $statuses, $dates){
+    $headers =  ['Name', 'Cellphone number', 'Message', 'Message_sid', 'Status', 'Sent_date-time'];
+    $file = fopen('message_detail.csv', 'w');
+    fputcsv($file, $headers);
+    foreach($names as $key => $content){
+        fputcsv($file, [$names[$key], $phones[$key], $message, $sids[$key], $statuses[$key], $dates[$key]]);
+    }
 }
